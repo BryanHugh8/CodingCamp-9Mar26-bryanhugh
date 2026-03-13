@@ -1072,6 +1072,9 @@ class FocusTimerComponent {
    * Validates: Requirements 8.6, 8.7
    */
   onComplete() {
+    // Play sound alert
+    this.playCompletionSound();
+    
     // Trigger notification on completion (Requirement 8.7)
     // Try to use Notification API if available
     if ('Notification' in window) {
@@ -1105,6 +1108,46 @@ class FocusTimerComponent {
 
     // Update button states (disable start until reset)
     this.updateButtonStates();
+  }
+  
+  /**
+   * Play completion sound using Web Audio API
+   * Creates a pleasant notification tone
+   */
+  playCompletionSound() {
+    try {
+      // Create audio context
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Create a pleasant three-tone notification sound
+      const playTone = (frequency, startTime, duration) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        
+        // Envelope for smooth sound
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+      };
+      
+      // Play three ascending tones (C5, E5, G5 - a pleasant C major chord)
+      const now = audioContext.currentTime;
+      playTone(523.25, now, 0.2);        // C5
+      playTone(659.25, now + 0.15, 0.2); // E5
+      playTone(783.99, now + 0.3, 0.3);  // G5
+      
+    } catch (error) {
+      console.warn('Could not play completion sound:', error);
+    }
   }
 
   /**
