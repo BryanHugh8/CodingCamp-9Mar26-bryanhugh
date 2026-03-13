@@ -1615,6 +1615,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Storage Manager first to check availability and show warnings
   StorageManager.init();
+  
+  // Request notification permission on first visit
+  if ('Notification' in window && Notification.permission === 'default') {
+    // Small delay to let the page load first for better UX
+    setTimeout(() => {
+      Notification.requestPermission();
+    }, 2000);
+  }
 
   // Initialize Theme Component first to apply theme before other components render
   const themeComponent = new ThemeComponent();
