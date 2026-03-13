@@ -370,6 +370,24 @@ body {
   transition: color 0.3s ease;
 }
 
+/* Task error message */
+.task-error-message {
+  padding: 12px 16px;
+  margin: 12px 0;
+  background-color: rgba(217, 83, 79, 0.1);
+  border-left: 3px solid var(--danger);
+  color: var(--danger);
+  font-size: 14px;
+  border-radius: 4px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  animation: slideIn 0.3s ease;
+}
+
+:root.light-theme .task-error-message {
+  background-color: rgba(217, 83, 79, 0.15);
+}
+
 /* Greeting Section - Enhanced styling (Task 11.2) */
 .greeting-section {
   text-align: center;

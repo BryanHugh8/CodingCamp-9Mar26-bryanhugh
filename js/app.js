@@ -525,7 +525,7 @@ class TaskListComponent {
    * Add new task with validation
    * Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6
    * @param {string} text - Task text to add
-   * @returns {boolean} - True if task added successfully, false if rejected
+   * @returns {object} - {success: boolean, error: string|null}
    */
   addTask(text) {
     // Trim whitespace before validation
@@ -533,18 +533,18 @@ class TaskListComponent {
     
     // Validate non-empty, non-whitespace text (Requirement 3.3)
     if (trimmedText.length === 0) {
-      return false;
+      return { success: false, error: 'Task cannot be empty' };
     }
     
     // Enforce max length (500 characters)
     if (trimmedText.length > 500) {
-      return false;
+      return { success: false, error: 'Task is too long (max 500 characters)' };
     }
     
     // Reject duplicates when duplicate prevention enabled (Requirement 3.4)
     // Note: Duplicate prevention is always enabled per the requirements
     if (this.isDuplicate(trimmedText)) {
-      return false;
+      return { success: false, error: 'This task already exists' };
     }
     
     // Create new task
@@ -564,7 +564,7 @@ class TaskListComponent {
     // Re-render the task list
     this.render();
     
-    return true;
+    return { success: true, error: null };
   }
 
   /**
@@ -1535,6 +1535,35 @@ class ThemeComponent {
 }
 
 /**
+ * Show error message to user
+ * @param {string} message - Error message to display
+ */
+function showErrorMessage(message) {
+  // Remove any existing error messages
+  const existingError = document.querySelector('.task-error-message');
+  if (existingError) {
+    existingError.remove();
+  }
+  
+  // Create error message element
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'task-error-message';
+  errorDiv.textContent = message;
+  
+  // Insert after task input container
+  const taskInputContainer = document.querySelector('.task-input-container');
+  taskInputContainer.parentNode.insertBefore(errorDiv, taskInputContainer.nextSibling);
+  
+  // Auto-dismiss after 3 seconds
+  setTimeout(() => {
+    errorDiv.style.opacity = '0';
+    setTimeout(() => {
+      errorDiv.remove();
+    }, 300);
+  }, 3000);
+}
+
+/**
  * Initialize application when DOM is ready
  * Optimized for fast initial load (< 500ms target)
  */
@@ -1581,11 +1610,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle add task button click
     const handleAddTask = () => {
       const text = taskInput.value;
-      const success = taskListComponent.addTask(text);
+      const result = taskListComponent.addTask(text);
       
       // Clear input field after successful add (Requirement 3.6)
-      if (success) {
+      if (result.success) {
         taskInput.value = '';
+      } else if (result.error) {
+        // Show error message
+        showErrorMessage(result.error);
       }
     };
 
